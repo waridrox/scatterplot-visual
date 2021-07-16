@@ -17,6 +17,50 @@ let svg = d3.select('svg')
 let tooltip = d3.select('#tooltip')
 
 
+let drawPoints = () => {
+
+    svg.selectAll('circle')
+            .data(values)
+            .enter()
+            .append('circle')
+            .attr('class', 'dot')
+            .attr('r', '5')
+            .attr('data-xvalue', (item) => {
+                return item['Year']
+            })
+            .attr('data-yvalue', (item) => {
+                return new Date(item['Seconds'] * 1000)
+            })
+          .attr('cx', (item) => {
+              return xScale(item['Year'])
+          })         
+            .attr('cy', (item) => {
+                return yScale(new Date(item['Seconds'] * 1000))
+            })
+            .attr('fill', (item) => {
+                if(item['URL'] === ""){
+                    return 'lightgreen'
+                }else{
+                    return 'orange'
+                }
+            })
+            .on('mouseover', (item) => {
+                tooltip.transition()
+                    .style('visibility', 'visible')
+                
+                if(item['Doping'] != ""){
+                    tooltip.text(item['Year'] + ' - ' + item['Name'] + ' - ' + item['Time'] + ' - ' + item['Doping'])
+                }else{
+                    tooltip.text(item['Year'] + ' - ' + item['Name'] + ' - ' + item['Time'] + ' - ' + 'No Allegations')
+                }
+                
+                tooltip.attr('data-year', item['Year'])
+            })
+            .on('mouseout', (item) => {
+                tooltip.transition()
+                    .style('visibility', 'hidden')
+            })
+}
 
 let generateAxes = () => {
 
@@ -44,6 +88,7 @@ req.open('GET', url, true)
 req.onload = () => {
     values = JSON.parse(req.responseText)
     console.log(values)
+    drawPoints()
     generateAxes()
 }
 req.send()
